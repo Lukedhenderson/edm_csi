@@ -4,6 +4,10 @@
 import sys, dnnlib, os, re, pathlib, pickle, tqdm, torch, utils, numpy as np
 import json, argparse
 from torch_utils import distributed as dist
+
+from fastMRI_dataloader import loader #change if using your own dataloader
+
+
 tnpy = lambda x: x.cpu().detach().numpy()
 recon_to_numpy = lambda reconstruction_gpu: torch.view_as_complex(reconstruction_gpu.permute(0,-2,-1,1).contiguous())[None].cpu().numpy().squeeze()
 # --- COMMENTED OUT: project-specific imports ---
@@ -29,6 +33,7 @@ with open(args.config, 'r') as f:
 
 path_net = config.get('path_net', '')
 device = config.get('device', 'cuda:0')
+save_dir = config.get('save_dir', 'reconstructions')
 
 # - Posterior sampling params
 seeds = config.get('seeds', [0])
@@ -58,16 +63,8 @@ class_label = config.get('class_label', None)
 # # - Mask params
 # slope1 = 1.0
 # slope2 = 10
-# --- COMMENTED OUT: project-specific data loader ---
-# # - Initializing data loader
-# ds = KspSensImgLoader(data_path,device=device)
-# kspace,coils,img,fname=ds[0]
-# _,C,M,N = kspace.shape
-# shape = [1,M,N]
-# del kspace,coils,img,fname
-# # - data loader
-# loader = DataLoader(ds, batch_size=batch_size, shuffle=shuffle,num_workers=num_workers, pin_memory=False)
-# --- TODO: provide your own M, N (image dimensions) ---
+
+
 M = config.get('M', None)  # image height
 N = config.get('N', None)  # image width
 # --- COMMENTED OUT: project-specific model checkpoint finder ---
@@ -171,6 +168,12 @@ for seed in seeds:
         x_next = x_next.detach()
         x_hat = x_hat.requires_grad_(False)
     reconstruction = recon_to_numpy(x_next)
+    
+    # --- Save output ---
+    os.makedirs(save_dir, exist_ok=True)
+    save_path = os.path.join(save_dir, f"reconstruction_seed{seed}.npy")
+    np.save(save_path, reconstruction)
+    print(f"Saved reconstruction to: {save_path}")
 
 # --- COMMENTED OUT: rest of project-specific data/result collection ---
 #         recs_seeds.append(recon_to_numpy(x_next))
