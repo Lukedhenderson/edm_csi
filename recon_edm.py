@@ -2,6 +2,7 @@
 # Reconstructing with EDM
 # --- EXTRACTED: essential imports for posterior sampling ---
 import sys, dnnlib, os, re, pathlib, pickle, tqdm, torch, utils, numpy as np
+import json, argparse
 from torch_utils import distributed as dist
 tnpy = lambda x: x.cpu().detach().numpy()
 recon_to_numpy = lambda reconstruction_gpu: torch.view_as_complex(reconstruction_gpu.permute(0,-2,-1,1).contiguous())[None].cpu().numpy().squeeze()
@@ -18,27 +19,36 @@ recon_to_numpy = lambda reconstruction_gpu: torch.view_as_complex(reconstruction
 # model_tik_rough = 2500 # which model tik we want to roughly use
 # edm_model_base_path = '/csiNAS3/yarefeen/accelerated_recon_hypothesis/src/edm_models/fastmri_brain_white_standardsize_v0_num_coils12_res0.9_dim2' # also specifies the resolution
 # save_base_path = '/csiNAS3/yarefeen/accelerated_recon_hypothesis/src/edm_recons'
-# --- TODO: set your own paths ---
-path_net = ''  # path to EDM .pkl checkpoint
-device = 'cuda:0'
+# --- Load Configuration ---
+parser = argparse.ArgumentParser(description="EDM MRI Reconstruction")
+parser.add_argument('--config', type=str, default='recon_config.json', help='Path to the configuration file')
+args = parser.parse_args()
+
+with open(args.config, 'r') as f:
+    config = json.load(f)
+
+path_net = config.get('path_net', '')
+device = config.get('device', 'cuda:0')
+
+# - Posterior sampling params
+seeds = config.get('seeds', [0])
+num_steps = config.get('num_steps', 300)
+img_lss = config.get('img_lss', 1.0)
+mot_lss = config.get('mot_lss', 1.0)
+sigma_max = config.get('sigma_max', 5.0)
+sigma_min = config.get('sigma_min', 0.002)
+S_noise = config.get('S_noise', 0)
+motion_est = config.get('motion_est', 0)
+rho = config.get('rho', 7)
+img_l_ss = config.get('img_l_ss', 1.0)
+class_label = config.get('class_label', None)
+
 # --- COMMENTED OUT: project-specific experiment parameters ---
 # # - Parameters
 # total_accelerations = [8,12,16,20,24,28,32]
 # acs = 12
 # dimension = 2 # 1D or 2D under-sampling
 # num_val = 50
-# - Posterior sampling params
-seeds = [0]
-num_steps = 300
-img_lss = 1.0
-mot_lss = 1.0
-sigma_max = 5.0
-sigma_min = 0.002
-S_noise = 0
-motion_est = 0
-rho=7
-img_l_ss=1.0
-class_label = None
 # --- COMMENTED OUT: project-specific misc/mask params ---
 # # - Misc params
 # shuffle = False
@@ -58,8 +68,8 @@ class_label = None
 # # - data loader
 # loader = DataLoader(ds, batch_size=batch_size, shuffle=shuffle,num_workers=num_workers, pin_memory=False)
 # --- TODO: provide your own M, N (image dimensions) ---
-M = None  # image height
-N = None  # image width
+M = config.get('M', None)  # image height
+N = config.get('N', None)  # image width
 # --- COMMENTED OUT: project-specific model checkpoint finder ---
 # # - loading edm model
 # pattern = re.compile(r"network-snapshot-(\d{6})\.pkl$")
