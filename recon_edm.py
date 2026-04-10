@@ -1,8 +1,12 @@
 #%reset -f
 # Reconstructing with EDM
 # --- EXTRACTED: essential imports for posterior sampling ---
-import sys, dnnlib, os, re, pathlib, pickle, tqdm, torch, utils, numpy as np
+import sys, os, re, pathlib, pickle, tqdm, torch, numpy as np
 import json, argparse
+
+# Add the 'edm' submodule to the Python path so we can import its dependencies
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'edm'))
+import dnnlib, utils
 from torch_utils import distributed as dist
 
 from fastMRI_dataloader import loader #change if using your own dataloader
