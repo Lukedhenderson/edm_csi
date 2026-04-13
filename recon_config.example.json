@@ -1,10 +1,12 @@
 {
-    "path_net": "",
+    "path_net": "path/to/edm_checkpoint.pkl",
     "device": "cuda:0",
-    "kspace_path": "",
-    "coils_path": "",
+
+    "kspace_path": "data/kspace.npy",
+    "coils_path": "data/coils.npy",
     "mask_path": null,
     "output_path": "reconstructions/recon.npy",
+
     "seeds": [0],
     "num_steps": 300,
     "sigma_max": 5.0,
