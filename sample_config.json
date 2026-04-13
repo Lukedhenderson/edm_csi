@@ -1,0 +1,15 @@
+{
+    "path_net": "",
+    "device": "cuda:0",
+    "M": null,
+    "N": null,
+    "num_samples": 1,
+    "batch_size": 1,
+    "num_steps": 300,
+    "sigma_max": 5.0,
+    "sigma_min": 0.002,
+    "rho": 7,
+    "seeds": [0],
+    "class_label": null,
+    "output_path": "prior_samples.npy"
+}

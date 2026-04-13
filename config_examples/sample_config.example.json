@@ -1,0 +1,18 @@
+{
+    "path_net": "path/to/edm_checkpoint.pkl",
+    "device": "cuda:0",
+
+    "M": 200,
+    "N": 200,
+    "num_samples": 4,
+    "batch_size": 8,
+
+    "num_steps": 300,
+    "sigma_max": 5.0,
+    "sigma_min": 0.002,
+    "rho": 7,
+
+    "seeds": [0, 1, 2],
+    "class_label": null,
+    "output_path": "prior_samples/samples.npy"
+}
